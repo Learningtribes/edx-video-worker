@@ -18,7 +18,7 @@ settings = get_config()
 def cel_start():
     app = Celery(
         settings.setdefault('celery_app_name', ''),
-        broker='redis://:' + '@' + settings.setdefault('redis_broker', '') + ':6379/0',
+        broker=settings['celery_broker'],
         include=['celeryapp']
     )
 
