@@ -20,7 +20,7 @@ def cel_start():
         settings.setdefault('celery_app_name', ''),
         broker='amqp://' + settings.setdefault('rabbitmq_user', '') +
                ':' + settings.setdefault('rabbitmq_pass', '') +
-               '@' + settings.setdefault('rabbitmq_broker', '') + ':5672//',
+               '@' + settings.setdefault('rabbitmq_broker', '') + ':5672//' + settings.setdefault('rabbitmq_vhost', ''),
         include=['celeryapp']
     )
 
