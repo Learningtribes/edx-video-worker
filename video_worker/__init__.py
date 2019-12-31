@@ -145,7 +145,7 @@ class VideoWorker(object):
             encoding=self.encode_profile
         ))
         logger.error('endpoint_url: ')
-        logger.error(endpoint_url)
+        logger.error(self.endpoint_url)
         logger.error('self.VideoObject.veda_id: ')
         logger.error(self.VideoObject.veda_id)
         if self.endpoint_url is not None and self.VideoObject.veda_id is not None:
