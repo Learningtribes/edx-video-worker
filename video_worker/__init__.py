@@ -144,6 +144,10 @@ class VideoWorker(object):
             id=self.VideoObject.val_id,
             encoding=self.encode_profile
         ))
+        logger.error('endpoint_url: ')
+        logger.error(endpoint_url)
+        logger.error('self.VideoObject.veda_id: ')
+        logger.error(self.VideoObject.veda_id)
         if self.endpoint_url is not None and self.VideoObject.veda_id is not None:
             # Integrate with main
             veda_id = self.veda_id
@@ -223,7 +227,26 @@ class VideoWorker(object):
         if self.source_file is None:
             if 'LOCAL_STORAGE' in self.settings.keys():
                 if self.settings['LOCAL_STORAGE']:
-                    pass
+                    if self.VideoObject.mezz_extension is not None and len(self.VideoObject.mezz_extension) > 0:
+                        self.source_file = '.'.join((
+                            self.VideoObject.veda_id,
+                            self.VideoObject.mezz_extension
+                        ))
+                    else:
+                        self.source_file = self.VideoObject.veda_id
+                    source_video_file = self.settings['LOCAL_WORK_DIR'] + '/veda/' + self.source_file
+                    destination_video_file = os.path.join(self.workdir, self.source_file)
+                    if not os.path.exists(source_video_file):
+                        logger.error('[ENCODE_WORKER] : {id} Local Storage Intake object not found'.format(
+                        id=self.VideoObject.val_id
+                        ))
+                        return
+                    shutil.copy(source_video_file, destination_video_file)
+                    if not os.path.exists(destination_video_file):
+                        logger.error('[ENCODE_WORKER] : {id} engine intake download error'.format(
+                            id=self.VideoObject.val_id
+                        ))
+                    return
                 else:
                     logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
                     return
