@@ -217,45 +217,64 @@ class VideoWorker(object):
                 id=self.VideoObject.val_id,
             ))
             return
-
+        
+        logger.error('self.source_file: ')
+        logger.error(self.source_file)
         if self.source_file is None:
-            if self.settings['onsite_worker'] is True:
-                conn = S3Connection(
-                    self.settings['veda_access_key_id'],
-                    self.settings['veda_secret_access_key']
+            if 'LOCAL_STORAGE' in self.settings.keys():
+                if self.settings['LOCAL_STORAGE']:
+                    pass
+                else:
+                    logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
+                    return
+            else:
+                logger.error('onsite_worker: ')
+                logger.error(self.settings['onsite_worker'])
+                if self.settings['onsite_worker'] is True:
+                    conn = S3Connection(
+                        self.settings['veda_access_key_id'],
+                        self.settings['veda_secret_access_key']
+                    )
+                else:
+                    conn = S3Connection()
+                try:
+                    bucket = conn.get_bucket(self.settings['veda_s3_hotstore_bucket'])
+                except S3ResponseError:
+                    logger.error('[ENCODE_WORKER] Invalid hotstore S3 bucket')
+                    return
+
+                logger.error('self.VideoObject.mezz_extension: ')
+                logger.error(self.VideoObject.mezz_extension)
+                if self.VideoObject.mezz_extension is not None and len(self.VideoObject.mezz_extension) > 0:
+                    self.source_file = '.'.join((
+                        self.VideoObject.veda_id,
+                        self.VideoObject.mezz_extension
+                    ))
+                else:
+                    self.source_file = self.VideoObject.veda_id
+                logger.error('self.source_file: ')
+                logger.error(self.source_file)
+                source_key = bucket.get_key(self.source_file)
+                logger.error('source_key: ')
+                logger.error(source_key)
+
+                if source_key is None:
+                    logger.error('[ENCODE_WORKER] : {id} S3 Intake object not found'.format(
+                        id=self.VideoObject.val_id
+                    ))
+                    return
+
+                source_key.get_contents_to_filename(
+                    os.path.join(self.workdir, self.source_file)
                 )
-            else:
-                conn = S3Connection()
-            try:
-                bucket = conn.get_bucket(self.settings['veda_s3_hotstore_bucket'])
-            except S3ResponseError:
-                logger.error('[ENCODE_WORKER] Invalid hotstore S3 bucket')
+                logger.error('os.path.join(self.workdir, self.source_file): ')
+                logger.error(os.path.join(self.workdir, self.source_file))
+
+                if not os.path.exists(os.path.join(self.workdir, self.source_file)):
+                    logger.error('[ENCODE_WORKER] : {id} engine intake download error'.format(
+                        id=self.VideoObject.val_id
+                    ))
                 return
-
-            if self.VideoObject.mezz_extension is not None and len(self.VideoObject.mezz_extension) > 0:
-                self.source_file = '.'.join((
-                    self.VideoObject.veda_id,
-                    self.VideoObject.mezz_extension
-                ))
-            else:
-                self.source_file = self.VideoObject.veda_id
-            source_key = bucket.get_key(self.source_file)
-
-            if source_key is None:
-                logger.error('[ENCODE_WORKER] : {id} S3 Intake object not found'.format(
-                    id=self.VideoObject.val_id
-                ))
-                return
-
-            source_key.get_contents_to_filename(
-                os.path.join(self.workdir, self.source_file)
-            )
-
-            if not os.path.exists(os.path.join(self.workdir, self.source_file)):
-                logger.error('[ENCODE_WORKER] : {id} engine intake download error'.format(
-                    id=self.VideoObject.val_id
-                ))
-            return
 
         self.VideoObject.valid = ValidateVideo(
             filepath=os.path.join(self.workdir, self.source_file)
