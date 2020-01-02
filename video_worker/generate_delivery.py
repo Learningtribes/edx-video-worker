@@ -66,6 +66,7 @@ class Deliverable(object):
                 source_video_file = os.path.join(self.workdir, self.output_file)
                 destination_video_file = settings['LOCAL_WORK_DIR'] + '/veda/' + self.output_file
                 shutil.copy(source_video_file, destination_video_file)
+                self.delivered = True
             else:
                 logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
                 return False
