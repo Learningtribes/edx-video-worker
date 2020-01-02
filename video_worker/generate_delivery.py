@@ -61,10 +61,10 @@ class Deliverable(object):
             ).read()
         ).hexdigest()
 
-        if 'LOCAL_STORAGE' in self.settings.keys():
-            if self.settings['LOCAL_STORAGE']:
+        if 'LOCAL_STORAGE' in settings.keys():
+            if settings['LOCAL_STORAGE']:
                 source_video_file = os.path.join(self.workdir, self.output_file)
-                destination_video_file = self.settings['LOCAL_WORK_DIR'] + '/veda/' + self.output_file
+                destination_video_file = settings['LOCAL_WORK_DIR'] + '/veda/' + self.output_file
                 shutil.copy(source_video_file, destination_video_file)
             else:
                 logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
@@ -80,8 +80,8 @@ class Deliverable(object):
         if self.delivered is False:
             return None
 
-        if 'LOCAL_STORAGE' in self.settings.keys():
-            if self.settings['LOCAL_STORAGE']:
+        if 'LOCAL_STORAGE' in settings.keys():
+            if settings['LOCAL_STORAGE']:
                 self.endpoint_url = 'https://test.domain.name/' + self.output_file
             else:
                 logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
