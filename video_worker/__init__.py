@@ -144,10 +144,6 @@ class VideoWorker(object):
             id=self.VideoObject.val_id,
             encoding=self.encode_profile
         ))
-        logger.error('endpoint_url: ')
-        logger.error(self.endpoint_url)
-        logger.error('self.VideoObject.veda_id: ')
-        logger.error(self.VideoObject.veda_id)
         if self.endpoint_url is not None and self.VideoObject.veda_id is not None:
             # Integrate with main
             veda_id = self.veda_id
@@ -222,8 +218,6 @@ class VideoWorker(object):
             ))
             return
         
-        logger.error('self.source_file: ')
-        logger.error(self.source_file)
         if self.source_file is None:
             if 'LOCAL_STORAGE' in self.settings.keys():
                 if self.settings['LOCAL_STORAGE']:
@@ -251,8 +245,6 @@ class VideoWorker(object):
                     logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
                     return
             else:
-                logger.error('onsite_worker: ')
-                logger.error(self.settings['onsite_worker'])
                 if self.settings['onsite_worker'] is True:
                     conn = S3Connection(
                         self.settings['veda_access_key_id'],
@@ -266,8 +258,6 @@ class VideoWorker(object):
                     logger.error('[ENCODE_WORKER] Invalid hotstore S3 bucket')
                     return
 
-                logger.error('self.VideoObject.mezz_extension: ')
-                logger.error(self.VideoObject.mezz_extension)
                 if self.VideoObject.mezz_extension is not None and len(self.VideoObject.mezz_extension) > 0:
                     self.source_file = '.'.join((
                         self.VideoObject.veda_id,
@@ -275,11 +265,7 @@ class VideoWorker(object):
                     ))
                 else:
                     self.source_file = self.VideoObject.veda_id
-                logger.error('self.source_file: ')
-                logger.error(self.source_file)
                 source_key = bucket.get_key(self.source_file)
-                logger.error('source_key: ')
-                logger.error(source_key)
 
                 if source_key is None:
                     logger.error('[ENCODE_WORKER] : {id} S3 Intake object not found'.format(
@@ -290,8 +276,6 @@ class VideoWorker(object):
                 source_key.get_contents_to_filename(
                     os.path.join(self.workdir, self.source_file)
                 )
-                logger.error('os.path.join(self.workdir, self.source_file): ')
-                logger.error(os.path.join(self.workdir, self.source_file))
 
                 if not os.path.exists(os.path.join(self.workdir, self.source_file)):
                     logger.error('[ENCODE_WORKER] : {id} engine intake download error'.format(

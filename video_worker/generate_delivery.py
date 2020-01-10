@@ -83,7 +83,7 @@ class Deliverable(object):
 
         if 'LOCAL_STORAGE' in settings.keys():
             if settings['LOCAL_STORAGE']:
-                self.endpoint_url = 'https://test.domain.name/' + self.output_file
+                self.endpoint_url = settings['LOCAL_VIDEO_URL'] + '/video_uploads/' + self.output_file
             else:
                 logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
         else:
