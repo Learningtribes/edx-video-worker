@@ -61,21 +61,37 @@ class Deliverable(object):
             ).read()
         ).hexdigest()
 
-        if self.upload_filesize < MULTI_UPLOAD_BARRIER:
-            # Upload single part
-            self.delivered = self._s3_upload()
+        if 'LOCAL_STORAGE' in settings.keys():
+            if settings['LOCAL_STORAGE']:
+                source_video_file = os.path.join(self.workdir, self.output_file)
+                destination_video_file = settings['LOCAL_WORK_DIR'] + '/veda/' + self.output_file
+                shutil.copy(source_video_file, destination_video_file)
+                self.delivered = True
+            else:
+                logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
+                return False
         else:
-            # Upload multipart
-            self.delivered = self._boto_multipart()
+            if self.upload_filesize < MULTI_UPLOAD_BARRIER:
+                # Upload single part
+                self.delivered = self._s3_upload()
+            else:
+                # Upload multipart
+                self.delivered = self._boto_multipart()
 
         if self.delivered is False:
             return None
 
-        self.endpoint_url = '/'.join((
-            'https://s3.amazonaws.com',
-            settings['veda_deliverable_bucket'],
-            self.output_file
-        ))
+        if 'LOCAL_STORAGE' in settings.keys():
+            if settings['LOCAL_STORAGE']:
+                self.endpoint_url = settings['LOCAL_VIDEO_URL'] + '/video_uploads/' + self.output_file
+            else:
+                logger.error('[ENCODE_WORKER] check LOCAL_STORAGE value')
+        else:
+            self.endpoint_url = '/'.join((
+                'https://s3.amazonaws.com',
+                settings['veda_deliverable_bucket'],
+                self.output_file
+            ))
         return True
 
     def _s3_upload(self):
